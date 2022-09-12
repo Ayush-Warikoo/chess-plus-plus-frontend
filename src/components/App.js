@@ -45,10 +45,17 @@ class App extends Component {
     messages: [],
     value: '',
     name: '',
-    room: 'vacad',
+    room: 'test',
   }
-
-  client = new W3CWebSocket('ws://django-chat-app.herokuapp.com/ws/chat/' + this.state.room + '/');
+   client = new WebSocket(
+    'ws://' +
+    'localhost:8000' +
+    '/ws/chat/' +
+    this.state.room +
+    '/'
+);
+//   client = new W3CWebSocket('ws://127.0.0.1:8000/ws/chat/' + this.state.room + '/');           
+//   client = new W3CWebSocket('ws://django-chat-app.herokuapp.com/ws/chat/' + this.state.room + '/');
 
   onButtonClicked = (e) => {
     this.client.send(JSON.stringify({
@@ -89,7 +96,7 @@ class App extends Component {
           <div style={{ marginTop: 50, }}>
             Room Name: {this.state.room}
             <Paper style={{ height: 500, maxHeight: 500, overflow: 'auto', boxShadow: 'none', }}>
-              {this.state.messages.map(message => <>
+              {this.state.messages.map((message, ind) => <React.Fragment key={`${this.state.room}-msg-${ind}`}>
                 <Card className={classes.root}>
                   <CardHeader
                     avatar={
@@ -101,14 +108,14 @@ class App extends Component {
                     subheader={message.msg}
                   />
                 </Card>
-              </>)}
+              </React.Fragment>)}
             </Paper>
 
             <form className={classes.form} noValidate onSubmit={this.onButtonClicked}>
               <TextField
                 id="outlined-helperText"
                 label="Make a comment"
-                defaultValue="Default Value"
+                // defaultValue="Default Value"
                 variant="outlined"
                 value={this.state.value}
                 fullWidth
@@ -133,7 +140,7 @@ class App extends Component {
             <CssBaseline />
             <div className={classes.paper}>
               <Typography component="h1" variant="h5">
-                ChattyRooms
+                Chess Plus Plus
                 </Typography>
               <form className={classes.form} noValidate onSubmit={value => this.setState({ isLoggedIn: true })}>
                 <TextField
@@ -142,8 +149,8 @@ class App extends Component {
                   required
                   fullWidth
                   id="email"
-                  label="Chatroom Name"
-                  name="Chatroom Name"
+                  label="Gameroom Name"
+                  name="Gameroom Name"
                   autoFocus
                   value={this.state.room}
                   onChange={e => {
@@ -173,7 +180,7 @@ class App extends Component {
                   color="primary"
                   className={classes.submit}
                 >
-                  Start Chatting
+                  Play Chess
                   </Button>
                 <Grid container>
                   <Grid item xs>
