@@ -1,6 +1,10 @@
-function isPromotion(move, game) {
-    return (move.to[1] === '8' && game.turn() === 'w')
-    || (move.to[1] === '1' && game.turn() === 'b');
+import { PIECE, WHITE, BLACK } from './constants';
+
+function isPawnPromotion(move, piece) {
+    console.log(piece);
+    return piece.type === PIECE.pawn
+    && ((move.to[1] === '8' && piece.color === WHITE)
+    || (move.to[1] === '1' && piece.color === BLACK));
 }
 
-export { isPromotion };
+export { isPawnPromotion };
