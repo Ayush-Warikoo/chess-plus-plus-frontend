@@ -4,11 +4,15 @@ import './index.css';
 import App from './components/App';
 import GameRoom from './components/GameRoom';
 import * as serviceWorker from './serviceWorker';
+import Login from './components/Login';
+import Lobby from './components/Lobby';
 
 ReactDOM.render(
   <React.StrictMode>
-    {/* <App /> */}
-    <GameRoom />
+    <App />
+    {/* <Login /> */}
+    {/* <GameRoom /> */}
+    {/* <Lobby /> */}
   </React.StrictMode>,
   document.getElementById('root')
 );
