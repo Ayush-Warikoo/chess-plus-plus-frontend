@@ -1,6 +1,7 @@
 import { Button, Container, CssBaseline, Grid, Link, TextField, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { createStyles, makeStyles } from "@material-ui/core/styles";
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -25,6 +26,7 @@ function Login(props) {
     // const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const classes = useStyles({ radius: 12 });
+    const navigate = useNavigate();
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -40,6 +42,7 @@ function Login(props) {
         .then(data => {
             console.log('Success:', data);
             props.onLogin();
+            navigate('/lobby', { replace: true });
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -60,6 +63,7 @@ function Login(props) {
         .then(data => {
             console.log('Success:', data);
             props.onLogin();
+            navigate('/lobby', { replace: true });
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -71,7 +75,7 @@ function Login(props) {
             <CssBaseline />
             <div className={classes.paper}>
                 <Typography component="h1" variant="h5">
-                    Chess Plus Plus
+                    Chess++
                 </Typography>
                 <form className={classes.form} noValidate onSubmit={handleLogin}>
                     <TextField

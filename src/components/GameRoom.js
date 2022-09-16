@@ -9,20 +9,30 @@ import { isPawnPromotion } from './helper';
 import { MESSAGE_TYPE, BLACK, WHITE } from './constants';
 import Header from './Header';
 
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
+import { useParams, useNavigate } from 'react-router-dom';
 
 function GameRoom({ username }) {
-    const gameKey = 'test2'; // uuidv4() is a function that generates a unique id
+    const { gameKey } = useParams();
     const game = useRef();
     const client = useRef();
     const [fen, setFen] = useState(null);
     const [orientation, setOrientation] = useState('white');
+    const [gameOver, setGameOver] = useState(false);
+    const [whitePlayer, setWhitePlayer] = useState('');
+    const [blackPlayer, setBlackPlayer] = useState('');
+    const navigate = useNavigate();
 
-    function initializeState(role, fen) {
+    function initializeState(role, fen, whitePlayer, blackPlayer) {
         console.log(fen);
         const Chess = typeof ChessJS === "function" ? ChessJS : ChessJS.Chess;
         game.current = new Chess(fen);
+        setWhitePlayer(whitePlayer);
+        setBlackPlayer(blackPlayer);
         setFen(game.current.fen());
+        if (role === BLACK) {
+            setOrientation('black');
+        }
         console.log(fen);
         client.current.role = role;
     }
@@ -47,16 +57,23 @@ function GameRoom({ username }) {
             console.log(data)
             if (data.username === username && data.type === MESSAGE_TYPE.join) {
                 console.log(data);
-                initializeState(data.role, data.message);
+                initializeState(data.role, data.message, data.whitePlayer, data.blackPlayer);
             } else if (data.username !== username && data.type === MESSAGE_TYPE.move) {
                 console.log(data.message);
                 handleMove(data.message, false);
             } else if (data.username !== username && data.type === MESSAGE_TYPE.undo) {
                 handleUndo(false);
+            } else if (data.username !== username && data.type === MESSAGE_TYPE.over) {
+                // resign
+                const winner = data.message === "W" ? "white" : "black";
+                alert('Game over, ' + winner + ' wins!');
+                setGameOver(true);
+            } else if (data.type === 'unauthorized') {
+                navigate('/', { replace: true })
             }
         };
         return () => client.current.close();
-    }, []); // removed client
+    }, []);
 
     function handleMove(move, emit) {
         const piece = game.current.get(move.from);
@@ -83,6 +100,7 @@ function GameRoom({ username }) {
 
     function checkGameStatus(emit) {
         if (game.current.isDraw()) {
+            setGameOver(true);
             setTimeout(() => alert('Game over, drawn position'), 300);
             if (emit) {
                 client.current.send(JSON.stringify({
@@ -92,6 +110,7 @@ function GameRoom({ username }) {
                 }));
             }
         } else if (game.current.isGameOver()) {
+            setGameOver(true);
             const winner = game.current.turn() === ChessJS.WHITE ? 'black' : 'white';
             setTimeout(() => alert('Game over, ' + winner + ' wins!'), 300);
             if (emit) {
@@ -125,29 +144,47 @@ function GameRoom({ username }) {
     }
 
     function onDrop(sourceSquare, targetSquare) {
-        if (game.current.isGameOver()) return;
+        if (gameOver) return;
         console.log(game.current);
         const proposedMove = { from: sourceSquare, to: targetSquare };
         handleMove(proposedMove, true);
     }
 
     function switchColor(color) {
-        return color === 'white' ? 'black' : 'white';
+        return (color === 'white' || color === 'w') ? 'black' : 'white';
+    }
+
+    function handleResign() {
+        setGameOver(true);
+        client.current.send(JSON.stringify({
+            type: MESSAGE_TYPE.over,
+            message: client.current.role === WHITE ? 'B' : 'W',
+            username,
+        }));
+        setTimeout(() => alert('Game over, ' + switchColor(client.current.role) + ' wins!'), 300);
     }
 
     return (
         <div style={{ background: '#eaeded', height: '100vh' }}>
-            <Header />
+            <Header username={username}/>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%' }}>
-                <Chessboard
-                    id="humanVsHuman"
-                    position={fen}
-                    onPieceDrop={onDrop}
-                    boardOrientation={orientation}
-                    width={500}
-                    // arePremovesAllowed={true}
-                    // clearPremovesOnRightClick={true}
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'lefr' }}>
+                    <Typography variant="h6" style={{ marginRight: '20px' }}>
+                        <b> {orientation === 'white' ? blackPlayer : whitePlayer} </b>
+                    </Typography>
+                    <Chessboard
+                        id="humanVsHuman"
+                        position={fen}
+                        onPieceDrop={onDrop}
+                        boardOrientation={orientation}
+                        width={500}
+                        // arePremovesAllowed={true}
+                        // clearPremovesOnRightClick={true}
+                    />
+                    <Typography variant="h6" style={{ marginRight: '20px' }}>
+                        <b> {orientation === 'white' ? whitePlayer : blackPlayer} </b>
+                    </Typography>
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     <Button
@@ -175,20 +212,22 @@ function GameRoom({ username }) {
                     >
                         Reset
                     </Button>
+                    
+                    {/* TODO: draw offer
                     <Button
                         variant="contained"
                         color="primary"
                         style={{ margin: '10px 20px', padding: '15px' }}
-                        // TODO: onClick={handleDrawOffer}
+                        onClick={handleDrawOffer}
                     >
                         Draw
-                    </Button>
+                    </Button> */}
 
                     <Button
                         variant="contained"
                         color="primary"
                         style={{ margin: '10px 20px', padding: '15px' }}
-                        // TODO: onClick={handleResign}
+                        onClick={handleResign}
                     >
                         Resign
                     </Button>
