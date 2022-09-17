@@ -179,12 +179,20 @@ function Lobby({ username }) {
                                 <CircularProgress styles={{marginLeft: 'auto', marginRight: '0px'}}/>
                             </div>
                             <p>
+                                Wait for an opponent to join the game!
+                                <br />
+                                <br />
+                                Click off window to cancel the game
+                            </p>
+
+                            {/* TODO: Uncomment once auth is implemented using JWT*/}
+                            {/* <p>
                                 You can wait for an opponent to join from the lobby or send the following link to a friend: <br /><br />
                                 <a href={`http://localhost:3000/game/${gameKey}`}>http://localhost:3000/game/{gameKey}</a>
                                 <br />
                                 <br />
                                 Click off window to cancel the game
-                            </p>
+                            </p> */}
                         </div>
                     </Modal>
             </Container>
